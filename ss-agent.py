@@ -17,7 +17,7 @@ import cpuinfo
 import psutil
 import requests
 
-API = 'http://127.0.0.1:5000/'
+API = 'http://192.168.7.198:5000/'
 
 
 def get_uptime():
@@ -59,8 +59,9 @@ def get_cpu_count():
 
 
 def get_cpu_freq():
-    # return '%d x %s MHz' % (psutil.cpu_count(), psutil.cpu_freq()[0])
-    return psutil.cpu_freq()[0]
+    # psutil won't return current cpu freq in visualization.
+    # return psutil.cpu_freq()[0]
+    return round(float(cpuinfo.get_cpu_info()['hz_actual'].split(' ')[0]), 2)
 
 
 def get_host_ip():
@@ -119,19 +120,6 @@ def disk():
     return [used, total, percent]
 
 
-# def top_process():
-#     process_list = []
-#     for pid in psutil.process_iter():
-#         pid.cpu_percent()
-#     time.sleep(1)
-#     for pid in psutil.process_iter():
-#         process_list.append((pid.cpu_percent(), pid.pid, pid.name(), round(pid.memory_info().vms / 1024.0 / 1024, 2)))
-#
-#     for i in range(len(process_list) - 1):
-#         if process_list[i][0] < process_list[i + 1][0]:
-#             process_list[i], process_list[i + 1] = process_list[i + 1], process_list[i]
-#     return process_list[0:4]
-
 def top_process():
     cmd = 'ps axc -o uname:12,pcpu,rss,cmd --sort=-pcpu,-rss --noheaders --width 120|head'
     with os.popen(cmd) as p:
@@ -140,12 +128,16 @@ def top_process():
     return info
 
 
+def get_hostname():
+    return platform.node()
+
+
 def build():
-    message = dict(auth=get_auth_token(), uptime=get_uptime(), os=[get_os(), get_kernel()],
-                   pro_count=get_process_count(),
+    message = dict(auth=get_auth_token(), hostname=get_hostname(),
+                   uptime=get_uptime(), os=[get_os(), get_kernel()], pro=get_process_count(),
                    session=get_sessions(), cpu=[get_cpu_model(), get_cpu_count(), get_cpu_freq()],
                    ip=get_host_ip(), network=network_activity(), flow=current_network_flow(),
-                   load=average_load(), mem=mem(), swap=swap(), disk=disk(), top=top_process()
+                   percent=average_load(), mem=mem(), swap=swap(), disk=disk(), top=top_process()
                    )
     return message
 
@@ -153,7 +145,7 @@ def build():
 def send_request(dic):
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
-    print(requests.post(API + 'v1/create', json=dic, headers=headers).status_code)
+    print(requests.post(API + 'v1/create', json=dic, headers=headers).text)
 
 
 def get_auth_token():

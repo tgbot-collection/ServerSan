@@ -21,11 +21,11 @@ After that, it's going to send POST request to the server.
 ### 2. Server side: webhook ###
 This webhook, is designed to receive and parse POST request from client side. 
 In order to prevent from DDoS attack, replay attack or any other kind of attack, we should verify the request. 
-After the validation of one single request, the webhook will parse and insert the information into an MySQL database.
+After the validation of one single request, the webhook will parse and insert the information into database.
 ### 3. Server side: database ###
-Currently we preferred to use MySQL instead of SQLite. The database, serversan, for now contains three tables:
+Currently we preferred to use MongoDB instead of MySQL. The database, serversan, for now contains three collections(tables):
 1. user info table, the columns are: userID, username, nickname, role_id
-2. system info table: cpu, mem, disk.....Key, userID
+2. system info table: cpu, mem, disk.....Key, token
 3. role table: role_id, name, permission.
 
 Be advised that every valid request will be stored in database for future demos(charts, etc.).
@@ -40,8 +40,7 @@ The server needs two program: webhook and telebot.
 
 ## Packages ##
 Flask for webhook, pyTelegramBotAPI for telegram bot wrapper, APScheduler for cron job inside telebot.
-
-Database is not yet decided, MongoDB or MySQL?
+And MongoDB for database.
 
 ## Contribution ##
 Any issues, PRs are welcomed! However, collaborators should obey some requirements:

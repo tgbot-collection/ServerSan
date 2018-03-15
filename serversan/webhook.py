@@ -7,20 +7,14 @@
 
 __author__ = 'Benny <benny@bennythink.com>'
 import json
-import os
-# TODO: or MongoDB, maybe.
-import pymysql
+import time
+
+import pymongo
 from flask import Flask, request
 
-from config import username, password
-
-un = os.environ.get('user') or username
-pwd = os.environ.get('password') or password
-
-con = pymysql.connect(host='127.0.0.1', user=un, password=pwd)
-
-# cur = con.cursor()
-# cur.execute('show databases')
+client = pymongo.MongoClient()
+db = client['ServerSan']
+col = db['sysinfo']
 
 app = Flask(__name__)
 
@@ -32,11 +26,27 @@ def hello():
     except ValueError:
         return json.dumps({'status': 1, 'info': 'request failed.'})
 
-    # database
-    print d.get('auth')
+    current_ts = time.time()
+    _id = False
+    d.update(timestamp=current_ts)
 
-    return json.dumps({'status': 0, 'info': 'success'})
+    perm = can_insert(d.get('auth'), current_ts)
+    if perm:
+        _id = col.insert_one(d).inserted_id
+    if _id:
+        return json.dumps({'status': 0, 'info': 'success'})
+    else:
+        return json.dumps({'status': 2, 'info': 'database failed: operation too frequent.'})
+
+
+def can_insert(auth_code, current_ts):
+    db_ts = 0
+    for i in col.find({'auth': auth_code}).sort('timestamp', pymongo.DESCENDING):
+        db_ts = i['timestamp']
+        break
+
+    return True if current_ts - db_ts >= 180 else False
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
