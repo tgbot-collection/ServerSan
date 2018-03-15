@@ -1,10 +1,14 @@
 # ServerSan
 This project is still under development and will not be available for some time.
 
+
 ## Description ##
 A telegram bot client/server to monitor Linux/Windows server status.
 
-The reference is [nodequery](nodequery.com).
+
+The reference is [nodequery](https://nodequery.com).
+## Development status ##
+* client side script is almost done. Except for upgrade utility.
 
 ## Design ##
 This program should support any platform that has a officially supported Python2/3.
@@ -33,10 +37,13 @@ The command may be extended in the future.
 ### conclusion ###
 The server needs two program: webhook and telebot.
 
+
 ## Packages ##
 Flask for webhook, pyTelegramBotAPI for telegram bot wrapper, APScheduler for cron job inside telebot.
 
-## Contribution##
+Database is not yet decided, MongoDB or MySQL?
+
+## Contribution ##
 Any issues, PRs are welcomed! However, collaborators should obey some requirements:
 1. Commits should be atomic, one commit should only resolve one issue. Thus please rebase your commits when necessary.
 2. Use English in comments and readme. Follow PEP8.
@@ -45,3 +52,12 @@ Any issues, PRs are welcomed! However, collaborators should obey some requiremen
 5. Repository structure should follow common structures: 
 test dir for unit test, serversan for main program, shell script and auxiliaries should be placed in root.
 6. Security of the server side is extremely important and should be able to protect against normal attacks.
+
+
+## FAQ ##
+### Why don't you choose to use `nq-agent.sh` ###
+Because shell scripts are limited to UNIX-like system while I want to add support for non-UNIX system if possible.
+
+
+## License ##
+Apache License 2.0
