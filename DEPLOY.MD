@@ -65,7 +65,7 @@ After=network.target network-online.target nss-lookup.target
 [Service]
 Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/python /home/ServerSan/webhook.py
+ExecStart=/usr/bin/python /home/ServerSan/serversan/webhook.py
 
 [Install]
 WantedBy=multi-user.target
@@ -80,7 +80,7 @@ After=network.target network-online.target nss-lookup.target
 [Service]
 Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/python /home/ServerSan/main.py TOKEN
+ExecStart=/usr/bin/python /home/ServerSan/serversan/main.py TOKEN
 
 [Install]
 WantedBy=multi-user.target
@@ -89,10 +89,22 @@ WantedBy=multi-user.target
 ```bash
 systemctl daemon-reload
 systemctl enable ssmain.service
-systemctl start ssmain.service
 systemctl enable sswebhook.service
+systemctl start ssmain.service
 systemctl start sswebhook.service
 ```
 
 ## More:
 * use Nginx for upstream.
+
+## Delete
+```bash
+systemctl stop ssmain.service
+systemctl stop sswebhook.service
+systemctl disable ssmain.service
+systemctl disable sswebhook.service
+rm /lib/systemd/system/ssmain.service
+rm /lib/systemd/system/sswebhook.service
+systemctl daemon-reload
+rm -r /home/ServerSan
+```

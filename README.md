@@ -8,7 +8,16 @@ A telegram bot client/server to monitor Linux/Windows server status.
 
 The reference is [nodequery](https://nodequery.com).
 ## Development status ##
-* client side script is almost done. Except for upgrade utility.
+- [x] client side script is almost done. Except for upgrade utility.
+- [x] Server side program
+- [x] SSL support 
+- [ ] Delete unused server block
+- [ ] Generate plot about mem, CPU, Disk...
+- [ ] Warning when resource exceeds
+- [ ] Personal settings(whether receive warnings, etc.)
+- [ ] Auto clean. 
+- [ ] TravisCI
+
 
 ## Design ##
 This program should support any platform that has a officially supported Python2/3.
