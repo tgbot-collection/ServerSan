@@ -1,6 +1,16 @@
 # Server Deployment
 For Ubuntu 16.04
 
+## 0. Setup bot
+Talk to BotFather, get your token and add following commands:
+```
+start - What's this bot?
+help - Help me please!
+delete - Delete server info
+stat - Show server info
+add - Add server
+```
+
 ## 1. Install dependencies
 ```bash
 sudo apt install python python-pip python-dev git curl wget build-essential openssl
