@@ -17,7 +17,8 @@ import cpuinfo
 import psutil
 import requests
 
-API = 'http://192.168.7.198:5000/'
+# API = 'http://192.168.50.1:5000/'
+API = 'https://api.serversan.date:5000/'
 
 
 def get_uptime():
@@ -79,9 +80,9 @@ def network_activity():
         new_value2 = psutil.net_io_counters().bytes_sent
 
         if old_value:
-            rx = (new_value - old_value) / 1024.0
-            tx = (new_value2 - old_value2) / 1024.0
-            rx_tx = (new_value - old_value + new_value2 - old_value2) / 1024.0
+            rx = round((new_value - old_value) / 1024.0, 2)
+            tx = round((new_value2 - old_value2) / 1024.0, 2)
+            rx_tx = round((new_value - old_value + new_value2 - old_value2) / 1024.0, 2)
             break
         old_value = new_value
         old_value2 = new_value2
@@ -92,7 +93,7 @@ def network_activity():
 def current_network_flow():
     rx = round(psutil.net_io_counters().bytes_recv / 1024.0 / 1024 / 1024, 2)
     tx = round(psutil.net_io_counters().bytes_sent / 1024.0 / 1024 / 1024, 2)
-    return [rx, tx]
+    return [tx, rx]
 
 
 def average_load():
@@ -133,7 +134,7 @@ def get_hostname():
 
 
 def build():
-    message = dict(auth=get_auth_token(), hostname=get_hostname(),
+    message = dict(auth=get_auth_token().rstrip('\n'), hostname=get_hostname(),
                    uptime=get_uptime(), os=[get_os(), get_kernel()], pro=get_process_count(),
                    session=get_sessions(), cpu=[get_cpu_model(), get_cpu_count(), get_cpu_freq()],
                    ip=get_host_ip(), network=network_activity(), flow=current_network_flow(),
@@ -144,7 +145,6 @@ def build():
 
 def send_request(dic):
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-
     print(requests.post(API + 'v1/create', json=dic, headers=headers).text)
 
 

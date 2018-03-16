@@ -45,11 +45,11 @@ if [ "$PM" = "yum" ]; then
     $PM makecache
 	$PM install -y epel-release
 	$PM makecache
-    $PM install -y python-pip cron
+    $PM install -y python-pip cron python-devel
     pip install setuptools psutil requests py-cpuinfo
 elif [ "$PM" = "apt" ]; then
 	$PM update
-    $PM install -y python-pip cron
+    $PM install -y python-pip cron python-dev
     pip install setuptools psutil requests py-cpuinfo
 fi
 
