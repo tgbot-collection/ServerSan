@@ -6,6 +6,7 @@
 #
 
 __author__ = 'Benny <benny@bennythink.com>'
+
 import json
 import time
 
@@ -30,16 +31,18 @@ def hello():
     _id = False
     d.update(timestamp=current_ts)
 
-    perm = can_insert(d.get('auth'), current_ts)
+    perm = ts_can_insert(d.get('auth'), current_ts) and token_can_insert(d.get('auth'))
+
     if perm:
         _id = col.insert_one(d).inserted_id
     if _id:
         return json.dumps({'status': 0, 'info': 'success'})
     else:
-        return json.dumps({'status': 2, 'info': 'database failed: operation too frequent.'})
+        return json.dumps({'status': 2, 'info': 'op too frequent or invalid token.'})
 
 
-def can_insert(auth_code, current_ts):
+# TODO: fake token prevention
+def ts_can_insert(auth_code, current_ts):
     db_ts = 0
     for i in col.find({'auth': auth_code}).sort('timestamp', pymongo.DESCENDING):
         db_ts = i['timestamp']
@@ -48,5 +51,19 @@ def can_insert(auth_code, current_ts):
     return True if current_ts - db_ts >= 180 else False
 
 
+# TODO: valid[] shouldn't be global since user may add server in Telegram.
+# TODO: but query database every 180 seconds in two loop is a bad idea.
+def token_can_insert(auth_code):
+    col2 = db['user']
+    valid = []
+    for i in col2.find():
+        for j in i['server']:
+            valid.append(j)
+
+    if auth_code in valid:
+        return True
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
+    # token_can_insert('222')
