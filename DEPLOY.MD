@@ -8,7 +8,7 @@ sudo apt install python python-pip python-dev git curl wget build-essential open
 
 ## 2. Install Python packages
 ```bash
-pip install pymongo pyTelegramBotAPI flask pyopenssl
+pip install pymongo pyTelegramBotAPI flask
 ```
 
 ## 3. Install MongoDB
@@ -83,3 +83,6 @@ systemctl start ssmain.service
 systemctl enable sswebhook.service
 systemctl start sswebhook.service
 ```
+
+## More:
+* use Nginx for upstream.

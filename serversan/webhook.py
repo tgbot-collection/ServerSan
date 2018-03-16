@@ -12,11 +12,6 @@ import time
 
 import pymongo
 from flask import Flask, request
-from OpenSSL import SSL
-
-context = SSL.Context(SSL.TLSv1_2_METHOD)
-context.use_privatekey_file('/etc/letsencrypt/live/serversan.date/privkey.pem')
-context.use_certificate_file('/etc/letsencrypt/live/serversan.date/fullchain.pem')
 
 client = pymongo.MongoClient()
 db = client['ServerSan']
@@ -25,8 +20,13 @@ col = db['sysinfo']
 app = Flask(__name__)
 
 
+@app.route("/")
+def index():
+    return json.dumps({'status': 0, 'info': 'This is ServerSan\'s index API.'})
+
+
 @app.route("/v1/create", methods=['POST'])
-def hello():
+def create():
     try:
         d = json.loads(request.data)
     except ValueError:
@@ -68,5 +68,6 @@ def token_can_insert(auth_code):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', ssl_context=context)
-    # token_can_insert('222')
+    path = '/etc/letsencrypt/live/serversan.date/'
+    context = (path + 'fullchain.pem', path + 'privkey.pem')
+    app.run(host='api.serversan.date', ssl_context=context)
