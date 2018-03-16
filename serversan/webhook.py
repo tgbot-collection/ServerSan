@@ -12,6 +12,11 @@ import time
 
 import pymongo
 from flask import Flask, request
+from OpenSSL import SSL
+
+context = SSL.Context(SSL.TLSv1_2_METHOD)
+context.use_privatekey_file('/etc/letsencrypt/live/serversan.date/privkey.pem')
+context.use_certificate_file('/etc/letsencrypt/live/serversan.date/fullchain.pem')
 
 client = pymongo.MongoClient()
 db = client['ServerSan']
@@ -41,7 +46,6 @@ def hello():
         return json.dumps({'status': 2, 'info': 'op too frequent or invalid token.'})
 
 
-# TODO: fake token prevention
 def ts_can_insert(auth_code, current_ts):
     db_ts = 0
     for i in col.find({'auth': auth_code}).sort('timestamp', pymongo.DESCENDING):
@@ -59,11 +63,10 @@ def token_can_insert(auth_code):
     for i in col2.find():
         for j in i['server']:
             valid.append(j)
-
     if auth_code in valid:
         return True
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', ssl_context=context)
     # token_can_insert('222')
