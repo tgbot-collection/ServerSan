@@ -59,15 +59,12 @@ def ts_can_insert(auth_code, current_ts):
 # TODO: but query database every 180 seconds in two loop is a bad idea.
 def token_can_insert(auth_code):
     col2 = db['user']
-    valid = []
-    for i in col2.find():
-        for j in i['server']:
-            valid.append(j)
-    if auth_code in valid:
-        return True
+    valid = [j for i in col2.find() for j in i['server']]
+    return True if auth_code in valid else False
 
 
 if __name__ == '__main__':
     path = '/etc/letsencrypt/live/serversan.date/'
     context = (path + 'fullchain.pem', path + 'privkey.pem')
     app.run(host='api.serversan.date', ssl_context=context)
+    # app.run()
