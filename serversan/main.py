@@ -277,9 +277,16 @@ def warning_send(msg, auth):
             log_col.update_one({'auth': auth}, {'$set': {'timestamp': time.time()}}, upsert=True)
 
 
+def del_old_records(sec):
+    for i in sysinfo_col.find():
+        if time.time() - i['timestamp'] > sec:
+            sysinfo_col.delete_one({'timestamp': i['timestamp']})
+
+
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.add_job(del_unused_server, 'interval', minutes=30)
     scheduler.add_job(resource_warning, 'interval', minutes=10)
+    # scheduler.add_job(del_old_records, 'cron', day='*/180', args=[180 * 24 * 3600])
     scheduler.start()
     bot.polling(none_stop=True)

@@ -15,7 +15,7 @@ The reference is [nodequery](https://nodequery.com).
 - [ ] Generate plot about mem, CPU, Disk...
 - [x] Warning when resource exceeds
 - [ ] Personal settings(whether receive warnings, etc.)
-- [ ] Auto clean. 
+- [x] Auto clean old records: every 180 days, not enable for now 
 - [ ] TravisCI
 
 
