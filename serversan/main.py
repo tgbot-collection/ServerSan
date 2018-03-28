@@ -15,6 +15,7 @@ from base64 import b64encode
 import pymongo
 import telebot
 from telebot import types
+from apscheduler.schedulers.background import BackgroundScheduler
 
 bot = telebot.TeleBot(sys.argv[1])
 client = pymongo.MongoClient()
@@ -62,7 +63,7 @@ def add_server(message):
     if user_col.update_one({'userID': message.chat.id}, {'$set': user_info}, upsert=True).acknowledged:
         bot.send_chat_action(message.chat.id, 'typing')
         bot.send_message(message.chat.id,
-                         "Execute the following command:\n\n"
+                         "Execute the following command(unused server will be deleted within 30 minutes):\n\n"
                          "`wget https://raw.githubusercontent.com/BennyThink/ServerSan/master/install.sh"
                          "&& bash install.sh %s`" % server_token, parse_mode='Markdown')
     else:
@@ -161,8 +162,6 @@ def parse_data(latest_info):
     CPU Model: %s
     CPU Speed: %sx %s MHz
     Network Activity↑↓:%s KiB/s %s KiB/s
-    Total Outgoing↑:%s GiB
-    Total Incoming↓:%s GiB  
     Average load: <b>%s</b> %%
     RAM: %s MiB of %s MiB , <b>%s%%</b>
     SWAP: %s MiB of %s MiB , <b>%s%%</b>
@@ -176,7 +175,7 @@ def parse_data(latest_info):
                             latest_info['cpu'][0],
                             latest_info['cpu'][1], latest_info['cpu'][2],
                             latest_info['network'][0], latest_info['network'][1],
-                            0, latest_info['auth'],
+
                             latest_info['percent'],
                             latest_info['mem'][0], latest_info['mem'][1], latest_info['mem'][2],
                             latest_info['swap'][0], latest_info['swap'][1], latest_info['swap'][2],
@@ -227,5 +226,16 @@ def parse_uptime(boot_time):
     return p1 + '%d days %d:%d' % (day, hour // 3600, minute // 60)
 
 
+def del_unused_server():
+    blocks = [(j, i['userID']) for i in user_col.find() for j in i['server']]
+
+    for i in blocks:
+        if sysinfo_col.find_one({'auth': i[0]}) is None:
+            delete_server(i[1], i[0])
+
+
 if __name__ == '__main__':
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(del_unused_server, 'interval', minutes=30)
+    scheduler.start()
     bot.polling(none_stop=True)

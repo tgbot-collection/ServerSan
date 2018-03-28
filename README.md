@@ -11,7 +11,7 @@ The reference is [nodequery](https://nodequery.com).
 - [x] client side script is almost done. Except for upgrade utility.
 - [x] Server side program
 - [x] SSL support 
-- [ ] Delete unused server block
+- [x] Delete unused server block within 30 minutes.
 - [ ] Generate plot about mem, CPU, Disk...
 - [ ] Warning when resource exceeds
 - [ ] Personal settings(whether receive warnings, etc.)
