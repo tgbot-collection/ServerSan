@@ -6,18 +6,19 @@
 # 
 
 __author__ = 'Benny <benny@bennythink.com>'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 import os
 import platform
 import socket
+import sys
 import time
 
 import cpuinfo
 import psutil
 import requests
 
-# API = 'http://192.168.50.1:5000/'
+# API = 'http://127.0.0.1:5000/'
 API = 'https://api.serversan.date:5000/'
 
 
@@ -167,4 +168,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 1:
+        main()
+    elif sys.argv[1] == 'version':
+        print('The current ServerSan agent verson is %s' % __version__)
+    else:
+        print('Wrong parameters.')
