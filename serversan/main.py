@@ -22,6 +22,7 @@ client = pymongo.MongoClient()
 db = client['ServerSan']
 user_col = db['user']
 sysinfo_col = db['sysinfo']
+log_col = db['loginfo']
 
 
 @bot.message_handler(commands=['start'])
@@ -54,7 +55,7 @@ def add_server(message):
     if user_info is None:
         user_info = dict(userID=message.chat.id, username=message.chat.username,
                          nickname=message.chat.first_name + message.chat.last_name,
-                         role=1000, server=[server_token])
+                         role=1000, server=[server_token], notify=1)
     else:
         server_block = user_info['server']
         server_block.append(server_token)
@@ -160,9 +161,9 @@ def parse_data(latest_info):
     Process: %s
     Sessions: <code>%s</code>
     CPU Model: %s
-    CPU Speed: %sx %s MHz
+    CPU Speed: %sx %s GHz
     Network Activity↑↓:%s KiB/s %s KiB/s
-    Average load: <b>%s</b> %%
+    CPU utilization: <b>%s</b> %%
     RAM: %s MiB of %s MiB , <b>%s%%</b>
     SWAP: %s MiB of %s MiB , <b>%s%%</b>
     Disk: %s GiB of %s GiB, <b>%s%%</b>
@@ -234,8 +235,51 @@ def del_unused_server():
             delete_server(i[1], i[0])
 
 
+def resource_warning():
+    auth_list = list(set([i['auth'] for i in sysinfo_col.find()]))
+    data = None
+    latest_each = []
+
+    for i in auth_list:
+        for j in sysinfo_col.find({'auth': i}):
+            data = j
+        latest_each.append(data)
+
+    for each in latest_each:
+        if time.time() - each['timestamp'] > 900:
+            warning_send(u'⚠Warning⚠\nYour server %s has lost connection for 900 seconds' % each['hostname'],
+                         each['auth'])
+        elif each['percent'] > 90.0 or each['mem'][2] > 90.0 or each['swap'][2] > 60.0:
+            warning_send(u'''⚠Warning⚠\nYour server %s is consuming a lot of resources.
+            CPU utilization: %s %%
+            Ram usage: %s %%
+            Swap usage: %s %%
+            Disk usage: %s %%
+            -------------------
+            Top process:\n%s''' % (
+                each['hostname'], each['percent'], each['mem'][2], each['swap'][2], each['disk'][2], each['top']),
+                         each['auth'])
+
+        elif each['disk'][2] > 80.0:
+            warning_send(u'''⚠Warning⚠\nYour server %s is not having enough free disk space.
+            Current disk status is showing as follows:
+            Used: %s GiB
+            All: %s GiB
+            Percentage: %s %%''' % (
+                each['hostname'], each['disk'][0], each['disk'][1], each['disk'][2]), each['auth'])
+
+
+def warning_send(msg, auth):
+    last_sent = log_col.find_one({'auth': auth})['timestamp']
+    for i in user_col.find():
+        if auth in i['server'] and i['notify'] and (time.time() - last_sent) > 14400:
+            bot.send_message(i['userID'], msg)
+            log_col.update_one({'auth': auth}, {'$set': {'timestamp': time.time()}}, upsert=True)
+
+
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.add_job(del_unused_server, 'interval', minutes=30)
+    scheduler.add_job(resource_warning, 'interval', minutes=10)
     scheduler.start()
     bot.polling(none_stop=True)

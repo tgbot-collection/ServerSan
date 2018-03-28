@@ -13,7 +13,7 @@ The reference is [nodequery](https://nodequery.com).
 - [x] SSL support 
 - [x] Delete unused server block within 30 minutes.
 - [ ] Generate plot about mem, CPU, Disk...
-- [ ] Warning when resource exceeds
+- [x] Warning when resource exceeds
 - [ ] Personal settings(whether receive warnings, etc.)
 - [ ] Auto clean. 
 - [ ] TravisCI
