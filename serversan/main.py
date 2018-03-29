@@ -97,7 +97,7 @@ def delete(message):
 
 
 @bot.message_handler(commands=['settings'])
-def delete(message):
+def settings(message):
     markup = types.ReplyKeyboardMarkup()
     itembtn1 = types.KeyboardButton('✌Yes')
     itembtn2 = types.KeyboardButton('🖐No')
@@ -155,10 +155,13 @@ def callback_handle(call):
         auth_code = info['auth']
 
         bot.answer_callback_query(call.id, 'Deleting your server %s' % info['hostname'])
-        msg = 'Your server has been deleted.' if delete_server(user_id, auth_code) else 'Something\'s wrong'
+        msg = 'Your server has been deleted. Run the following commands on your server:\n\n' + \
+              '''<code>rm -R /etc/serversan && (crontab -u serversan -l | grep -v "/etc/serversan/ss-agent.py") \
+    |crontab -u serversan - && userdel serversan</code>''' \
+            if delete_server(user_id, auth_code) else 'Something\'s wrong'
         markup = create_server_markup(user_id, 'delete')
         bot.edit_message_reply_markup(user_id, call.message.message_id, reply_markup=markup)
-        bot.send_message(call.message.chat.id, msg)
+        bot.send_message(call.message.chat.id, msg, parse_mode='HTML')
 
 
 def delete_server(_id, auth_code):
@@ -297,6 +300,7 @@ def warning_send(msg, auth):
     log = log_col.find_one({'auth': auth}) or {'timestamp': 0}
     last_sent = log['timestamp']
     for i in user_col.find():
+        # 14400 seconds: sent alert , 4 hours
         if auth in i['server'] and i['notify'] and (time.time() - last_sent) > 14400:
             bot.send_message(i['userID'], msg)
             log_col.update_one({'auth': auth}, {'$set': {'timestamp': time.time()}}, upsert=True)
