@@ -121,7 +121,8 @@ def common(message):
 def create_server_markup(chat_id, op):
     one_latest_server = get_user_server(chat_id)  # type: List[Union[dict, Any]]  
     btn_list = []
-    count = len(one_latest_server)
+    count = get_effective_count(chat_id)
+
     size = 2
     markup = types.InlineKeyboardMarkup(size)
 
@@ -211,16 +212,15 @@ def parse_data(latest_info):
                             latest_info['top']), latest_info['hostname']
 
 
-def get_server_count(_id):
-    for i in user_col.find({'userID': _id}):
-        return len(i.get('server'))
-
-
 def server_group(auth_code):
     group = []
     for i in sysinfo_col.find({'auth': auth_code}):
         group.append(i)
     return group
+
+
+def get_effective_count(_id):
+    return len([auth for auth in user_col.find_one({'userID': _id})['server'] if sysinfo_col.find_one({'auth': auth})])
 
 
 def get_user_server(_id):
