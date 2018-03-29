@@ -12,10 +12,10 @@ The reference is [nodequery](https://nodequery.com).
 - [x] Server side program
 - [x] SSL support 
 - [x] Delete unused server block within 30 minutes.
-- [ ] Generate plot about mem, CPU, Disk...
 - [x] Warning when resource exceeds
-- [ ] Personal settings(whether receive warnings, etc.)
+- [x] Personal settings: notifications.
 - [x] Auto clean old records: every 180 days, not enable for now 
+- [ ] Generate plot about mem, CPU, Disk...
 - [ ] TravisCI
 
 

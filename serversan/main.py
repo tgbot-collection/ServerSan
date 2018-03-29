@@ -4,7 +4,6 @@
 # ServerSan - main.py
 # 2018/3/15 13:43
 # 
-from typing import List, Any, Union
 
 __author__ = 'Benny <benny@bennythink.com>'
 __version__ = '0.0.2'
@@ -13,6 +12,7 @@ import os
 import sys
 import time
 from base64 import b64encode
+from typing import List, Any, Union
 
 import pymongo
 import telebot
@@ -43,7 +43,7 @@ def bot_help(message):
     bot.send_chat_action(message.chat.id, 'typing')
     bot.send_message(message.chat.id,
                      "Developer @BennyThink \n"
-                     "GitHub https://github.com/BennyThink/ExpressBot \n"
+                     "GitHub https://github.com/BennyThink/ServerSan \n"
                      "Feel free to open an issue or talk to me directly!")
 
 
@@ -87,7 +87,7 @@ def stat(message):
         bot.send_message(message.chat.id, 'Oww you don\'t have any servers, click /add to add one.')
 
 
-@bot.message_handler(commands=['del'])
+@bot.message_handler(commands=['delete'])
 def delete(message):
     markup = create_server_markup(message.chat.id, 'delete')
     if markup.to_dic()['inline_keyboard']:
@@ -294,7 +294,8 @@ def resource_warning():
 
 
 def warning_send(msg, auth):
-    last_sent = log_col.find_one({'auth': auth})['timestamp']
+    log = log_col.find_one({'auth': auth}) or {'timestamp': 0}
+    last_sent = log['timestamp']
     for i in user_col.find():
         if auth in i['server'] and i['notify'] and (time.time() - last_sent) > 14400:
             bot.send_message(i['userID'], msg)
