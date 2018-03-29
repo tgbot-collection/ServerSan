@@ -4,8 +4,10 @@
 # ServerSan - main.py
 # 2018/3/15 13:43
 # 
+from typing import List, Any, Union
 
 __author__ = 'Benny <benny@bennythink.com>'
+__version__ = '0.0.2'
 
 import os
 import sys
@@ -94,13 +96,35 @@ def delete(message):
         bot.send_message(message.chat.id, 'Oww you don\'t have any servers.')
 
 
-def create_server_markup(chat_id, op):
-    one_latest_server = get_user_server(chat_id)
+@bot.message_handler(commands=['settings'])
+def delete(message):
+    markup = types.ReplyKeyboardMarkup()
+    itembtn1 = types.KeyboardButton('✌Yes')
+    itembtn2 = types.KeyboardButton('🖐No')
+    markup.add(itembtn1, itembtn2)
+    bot.send_message(message.chat.id, 'Do you wish to enable notifications?', reply_markup=markup)
 
+
+@bot.message_handler()
+def common(message):
+    markup = types.ReplyKeyboardRemove(selective=False)
+    if message.text == u'✌Yes':
+        user_col.update_one({'userID': message.chat.id}, {"$set": {'notify': 1}})
+        bot.send_message(message.chat.id, 'Your settings has been saved.', reply_markup=markup)
+    elif message.text == u'🖐No':
+        user_col.update_one({'userID': message.chat.id}, {"$set": {'notify': 0}})
+        bot.send_message(message.chat.id, 'Your settings has been saved.', reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, 'Meow~', reply_markup=markup)
+
+
+def create_server_markup(chat_id, op):
+    one_latest_server = get_user_server(chat_id)  # type: List[Union[dict, Any]]  
     btn_list = []
     count = len(one_latest_server)
     size = 2
     markup = types.InlineKeyboardMarkup(size)
+
     for index in range(0, count):
         btn_list.append(types.InlineKeyboardButton(
             "%s %s" % (one_latest_server[index]['hostname'], one_latest_server[index]['ip']),
@@ -126,7 +150,7 @@ def callback_handle(call):
         bot.send_message(call.message.chat.id, info, parse_mode='HTML')
     elif 'delete' in call.data:
         # delete is two step, delete server block and systat
-        info = get_user_server(call.message.chat.id)[int(call.data.split()[1])]
+        info = get_user_server(call.message.chat.id)[int(call.data.split()[1])]  # type: Union[dict]
         user_id = call.message.chat.id
         auth_code = info['auth']
 
