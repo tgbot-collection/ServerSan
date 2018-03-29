@@ -6,7 +6,7 @@
 # 
 
 __author__ = 'Benny <benny@bennythink.com>'
-__version__ = '0.0.2'
+__version__ = '1.0.0'
 
 import os
 import sys
@@ -19,7 +19,12 @@ import telebot
 from telebot import types
 from apscheduler.schedulers.background import BackgroundScheduler
 
-bot = telebot.TeleBot(sys.argv[1])
+try:
+    bot = telebot.TeleBot(sys.argv[1])
+except IndexError as e:
+    print('Usage: python main.py token')
+    sys.exit(1)
+
 client = pymongo.MongoClient()
 db = client['ServerSan']
 user_col = db['user']

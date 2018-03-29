@@ -6,7 +6,7 @@
 # 
 
 __author__ = 'Benny <benny@bennythink.com>'
-__version__ = '0.0.2'
+__version__ = '1.0.0'
 
 import os
 import platform
