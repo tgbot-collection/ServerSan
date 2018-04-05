@@ -79,10 +79,6 @@ def add_server(message):
         bot.send_message(message.chat.id, 'Something is going wrong')
 
 
-def generate_token():
-    return b64encode(os.urandom(16))
-
-
 @bot.message_handler(commands=['stat'])
 def stat(message):
     markup = create_server_markup(message.chat.id, 'stat')
@@ -123,7 +119,39 @@ def common(message):
         bot.send_message(message.chat.id, 'Meow~', reply_markup=markup)
 
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handle(call):
+    if 'stat' in call.data:
+        info, notify = parse_data(get_user_server(call.message.chat.id)[int(call.data.split()[1])])
+        bot.answer_callback_query(call.id, 'Your info for %s' % notify)
+        bot.send_message(call.message.chat.id, info, parse_mode='HTML')
+    elif 'delete' in call.data:
+        # delete is two step, delete server block and systat
+        info = get_user_server(call.message.chat.id)[int(call.data.split()[1])]  # type: Union[dict]
+        user_id = call.message.chat.id
+        auth_code = info['auth']
+
+        bot.answer_callback_query(call.id, 'Deleting your server %s' % info['hostname'])
+        msg = 'Your server has been deleted. Run the following commands on your server:\n\n' + \
+              '''<code>rm -R /etc/serversan && (crontab -u serversan -l | grep -v "/etc/serversan/ss-agent.py") \
+    |crontab -u serversan - && userdel serversan</code>''' \
+            if delete_server(user_id, auth_code) else 'Something\'s wrong'
+        markup = create_server_markup(user_id, 'delete')
+        bot.edit_message_reply_markup(user_id, call.message.message_id, reply_markup=markup)
+        bot.send_message(call.message.chat.id, msg, parse_mode='HTML')
+
+
+def generate_token():
+    return b64encode(os.urandom(16))
+
+
 def create_server_markup(chat_id, op):
+    """
+    create server information markup based on different operation
+    :param chat_id: chat_id from which conversation
+    :param op: delete or stat
+    :return: 2 lines in a row markup
+    """
     one_latest_server = get_user_server(chat_id)  # type: List[Union[dict, Any]]  
     btn_list = []
     count = get_effective_count(chat_id)
@@ -146,28 +174,6 @@ def create_server_markup(chat_id, op):
             markup.add(part[0])
 
     return markup
-
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handle(call):
-    if 'stat' in call.data:
-        info, notify = parse_data(get_user_server(call.message.chat.id)[int(call.data.split()[1])])
-        bot.answer_callback_query(call.id, 'Your info for %s' % notify)
-        bot.send_message(call.message.chat.id, info, parse_mode='HTML')
-    elif 'delete' in call.data:
-        # delete is two step, delete server block and systat
-        info = get_user_server(call.message.chat.id)[int(call.data.split()[1])]  # type: Union[dict]
-        user_id = call.message.chat.id
-        auth_code = info['auth']
-
-        bot.answer_callback_query(call.id, 'Deleting your server %s' % info['hostname'])
-        msg = 'Your server has been deleted. Run the following commands on your server:\n\n' + \
-              '''<code>rm -R /etc/serversan && (crontab -u serversan -l | grep -v "/etc/serversan/ss-agent.py") \
-    |crontab -u serversan - && userdel serversan</code>''' \
-            if delete_server(user_id, auth_code) else 'Something\'s wrong'
-        markup = create_server_markup(user_id, 'delete')
-        bot.edit_message_reply_markup(user_id, call.message.message_id, reply_markup=markup)
-        bot.send_message(call.message.chat.id, msg, parse_mode='HTML')
 
 
 def delete_server(_id, auth_code):
@@ -209,7 +215,7 @@ def parse_data(latest_info):
                             latest_info['cpu'][0],
                             latest_info['cpu'][1], latest_info['cpu'][2],
                             latest_info['network'][0], latest_info['network'][1],
-
+                            # TODO: calculate total incoming and outgoing.
                             latest_info['percent'],
                             latest_info['mem'][0], latest_info['mem'][1], latest_info['mem'][2],
                             latest_info['swap'][0], latest_info['swap'][1], latest_info['swap'][2],
@@ -218,10 +224,12 @@ def parse_data(latest_info):
 
 
 def server_group(auth_code):
-    group = []
-    for i in sysinfo_col.find({'auth': auth_code}):
-        group.append(i)
-    return group
+    """
+    return all the server information under one auth code
+    :param auth_code: auth code from user_info
+    :return: [{block1},{block2}]
+    """
+    return [i for i in sysinfo_col.find({'auth': auth_code})]
 
 
 def get_effective_count(_id):
@@ -234,13 +242,12 @@ def get_user_server(_id):
     :param _id: user_id
     :return: [{},{}] for the newest information on one server
     """
-    user_server = []
+
     info = 'No information'
     all_server = []
+    # user_server contains an user's all auth token
+    user_server = [t for i in user_col.find({'userID': _id}) for t in i.get('server')]
 
-    for i in user_col.find({'userID': _id}):
-        for t in i.get('server'):
-            user_server.append(t)
     for token in user_server:
         for info in sysinfo_col.find({'auth': token}):
             pass

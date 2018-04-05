@@ -108,7 +108,7 @@ systemctl start sswebhook.service
 ## Resource Consumption
 Under my normal running, only for your reference, the actually RAM consumption may vary significantly.
 * Webhook: CPU: 0.984s, RAM: 21.3MiB with 3 tasks
-* main: CPU: 5.604s, RAM: 29.2MiB with 7 tasks
+* main: CPU: 5.604s, RAM: 29.2MiB with 7 tasks **deadlock issue!!!**
 * MongoDB: CPU: 19.985s, RAM: more RAM, more faster. For me it used about 150MiB of RAM with 27 tasks(threads).
 
 
