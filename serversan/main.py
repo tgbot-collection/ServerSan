@@ -193,7 +193,7 @@ def parse_data(latest_info):
     :param latest_info: the latest info about one server
     :return: string to be sent
     """
-    return u'''Your server <code>%s</code> on %s info:\n
+    return u'''Your server <code>%s</code> on %s as of %s info:\n
     System Uptime: %s
     OS: %s
     Kernel: %s
@@ -207,6 +207,7 @@ def parse_data(latest_info):
     SWAP: %s MiB of %s MiB , <b>%s%%</b>
     Disk: %s GiB of %s GiB, <b>%s%%</b>
     Top Process: \n%s''' % (latest_info['hostname'], latest_info['ip'],
+                            time.strftime('%Y-%m-%d %H:%M', time.localtime(latest_info['timestamp'])),
                             parse_uptime(latest_info['uptime']),
                             latest_info['os'][0],
                             latest_info['os'][1],
