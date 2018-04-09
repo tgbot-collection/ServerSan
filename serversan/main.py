@@ -116,7 +116,8 @@ def common(message):
         user_col.update_one({'userID': message.chat.id}, {"$set": {'notify': 0}})
         bot.send_message(message.chat.id, 'Your settings has been saved.', reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, 'Meow~', reply_markup=markup)
+        bot.send_message(message.chat.id, message.text, reply_markup=markup,
+                         parse_mode='HTML')
 
 
 @bot.callback_query_handler(func=lambda call: True)
