@@ -290,7 +290,7 @@ def resource_warning():
         if time.time() - each['timestamp'] > 900:
             warning_send(u'⚠Warning⚠\nYour server %s has lost connection for 900 seconds' % each['hostname'],
                          each['auth'])
-        elif each['percent'] > 90.0 or each['mem'][2] > 90.0 or each['swap'][2] > 60.0:
+        elif each['percent'] > 95.0 or each['mem'][2] > 90.0 or each['swap'][2] > 60.0:
             warning_send(u'''⚠Warning⚠\nYour server %s is consuming a lot of resources.
             CPU utilization: %s %%
             Ram usage: %s %%
