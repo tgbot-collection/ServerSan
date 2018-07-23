@@ -1,5 +1,5 @@
 # ServerSan
-This project is still under development. However, you may want to [try it out](https://t.me/serversan_bot)!
+This project is still under development. No, it's a dead project [it's a dead project](https://t.me/serversan_bot)!
 
 
 ## Description ##
@@ -61,7 +61,7 @@ hod release of thread.lock object at remote 0x7f68a8ae8190>) at remote 0x7f68b03
 I may need more investigation.
 
 ## Setup your own bot ##
-Please reference [DEPLOY.MD](DEPLOY.MD).
+Please reference [DEPLOY.MD](DEPLOY.md).
 
 
 ## Development status ##
